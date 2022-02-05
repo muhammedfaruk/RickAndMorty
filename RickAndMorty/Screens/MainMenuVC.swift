@@ -67,14 +67,11 @@ class MainMenuVC: UIViewController {
     // MARK: Get Data From Network
     private func getCharacters(pageNumber : Int) {
         
-        if showSkeleton {
-            showSkeleton(uıView: collectionView)
-        }
-        
+        showSkeleton ? showSkeleton(uıView: collectionView) : showLoadingView()
         isLoadingMoreCharacter = true
         NetworkManager.shared.getCharacters(type: .characters, page: page) {[weak self] characterList, error in
             guard let self = self else {return}
-            self.hideSkeleton(uıView: self.collectionView)
+            self.showSkeleton ? self.hideSkeleton(uıView: self.view) : self.hideLoadingView()
             
             guard error == nil else {
                 //Internet connection error
@@ -188,10 +185,10 @@ extension MainMenuVC: UISearchBarDelegate {
 extension MainMenuVC : FilterSettingsVCDelegate {
     
     func didTapSearchButton(gender: String, status: String, species: String) {
-        
+        showLoadingView()
         NetworkManager.shared.filterCharacters(status: status, gender: gender, species: species) { [weak self] characterList, error in
             guard let self = self else {return}
-            
+            self.hideLoadingView()
             guard error == nil else {
                 //Internet connection error
                 self.presentAlert(message: "Please check your network connection!", title: "No Connection")
