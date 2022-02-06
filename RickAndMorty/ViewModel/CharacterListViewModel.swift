@@ -5,7 +5,7 @@
 //  Created by Muhammed Faruk Söğüt on 6.02.2022.
 //
 
-import Foundation
+import UIKit
 
 class CharacterListViewModel {
     
@@ -82,6 +82,12 @@ class CharacterListViewModel {
                 self.mainMenuVCOutPut?.saveDatas(characters: self.characterArray)
             }
         }
+    }
+    
+    
+    func selectCharacter(row : Int){
+        let character = characterArray[row]
+        mainMenuVCOutPut?.selectedCharacter(character: character)        
     }
      
         

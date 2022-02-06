@@ -10,6 +10,7 @@ import UIKit
 protocol MainMenuVCOutPut {
     func changeLoading(isLoading: Bool, isLoadMoreCharacter: Bool)
     func saveDatas(characters: [Character])
+    func selectedCharacter(character: Character)
     func getError(errorRawValue: String)
 }
 
@@ -77,20 +78,27 @@ class MainMenuVC: UIViewController {
 
 //MARK: Connection to ViewModel
 extension MainMenuVC: MainMenuVCOutPut {
-   
+        
     func changeLoading(isLoading: Bool, isLoadMoreCharacter: Bool) {
         isLoading ? showLoadingView() : hideLoadingView()
         isLoadingMoreCharacter = isLoadMoreCharacter
     }
-        
+    
+    
     func saveDatas(characters: [Character]) {
         characterList = characters
         collectionView.reloadData()
     }
     
-     func getError(errorRawValue: String) {
-         presentAlert(message: errorRawValue, title: "Error!")
-     }
+    
+    func selectedCharacter(character: Character) {
+        navigationController?.pushViewController(CharacterDetailVC(character: character), animated: true)
+    }
+    
+    
+    func getError(errorRawValue: String) {
+        presentAlert(message: errorRawValue, title: "Error!")
+    }
 }
 
 
@@ -114,8 +122,8 @@ extension MainMenuVC: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        let detailVC = CharacterDetailVC(character: characterList[indexPath.item])        
-        navigationController?.pushViewController(detailVC, animated: true)
+        
+        viewModel.selectCharacter(row: indexPath.row)
     }
     
     // go to new page character
