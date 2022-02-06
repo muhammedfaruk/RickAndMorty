@@ -27,9 +27,9 @@ class FilterSettingsVC: UIViewController, UITextFieldDelegate {
     let speciesTextField = MyCustomTextField(placeholder_: "Human")
     
     var activeArray     = [String]()
-    var gender          = [String]()
-    var status          = [String]()
-    var species         = [String]()
+    var gender          : [String] = ["Female", "Male", "Genderless", "unknown"]
+    var status          : [String] = ["Alive", "Dead","unknown"]
+    var species         : [String] = ["Human", "Alien", "Humanoid"]
     
     var selectedfilter  : String = ""
     var activeTextField = UITextField()
@@ -43,37 +43,28 @@ class FilterSettingsVC: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        
         configureLayout()
         configurePickerView()
         configureToolBar()
-        
         searchButton.addTarget(self, action: #selector(searchBtnTapped), for: .touchUpInside)
-    }
-    
-    @objc private func searchBtnTapped(){
-                                    
-        let gender  = genderTextField.text!
-        let species = speciesTextField.text!
-        let status  = statusTextField.text!                
-            
-        // user have to fill all fields
-        guard !gender.isEmpty && !species.isEmpty && !status.isEmpty else {
-            presentAlert(message: "Please fill all fields", title: "Find Empty Fields!")
-            return
-        }
-        dismiss(animated: true)
-        delegate?.didTapSearchButton(gender: gender, status: status, species: species)
     }
     
     private func configurePickerView(){
         picker.delegate = self
         picker.dataSource = self
-        
-        gender = ["Female", "Male", "Genderless", "unknown"]
-        status = ["Alive", "Dead","unknown"]
-        species = ["Human", "Alien", "Humanoid"]
     }
     
+    
+    @objc private func searchBtnTapped(){
+                                    
+        let gender  = genderTextField.text!.isEmpty ? "Female" : genderTextField.text!
+        let species = speciesTextField.text!.isEmpty ? "Human" : speciesTextField.text!
+        let status  = statusTextField.text!.isEmpty ? "Alive" : statusTextField.text!
+
+        dismiss(animated: true)
+        delegate?.didTapSearchButton(gender: gender, status: status, species: species)
+    }
     
     private func configureToolBar() {
         toolBar.sizeToFit()

@@ -7,17 +7,23 @@
 
 import UIKit
 
+protocol FavoritesVCOutPut {
+    func saveDatas(favoriteList: [Favorite])
+}
+
 class FavoritesVC: UIViewController {
     
-    var favorites : [Favorite] = []
-    
     var tableView = UITableView()
+    
+    lazy var viewModel  : FavoriteViewModel = FavoriteViewModel()
+    var favorites       : [Favorite] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureVC()
         configureTableView()
-        getFavorites()
+        viewModel.setDelegate(output: self)
+        viewModel.getFavorites()
     }
     
     private func configureVC(){
@@ -28,7 +34,7 @@ class FavoritesVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        getFavorites()
+        viewModel.getFavorites()
     }
     
     
@@ -41,35 +47,19 @@ class FavoritesVC: UIViewController {
         
         tableView.register(FavoritesCell.self, forCellReuseIdentifier: FavoritesCell.reuseID)
     }
+}
+
+// MARK: Connect ViewModel
+extension FavoritesVC : FavoritesVCOutPut {
     
-    
-    private func getFavorites(){
-        
-        FavoritesManager.retrieveFavorites {[weak self] result in
-            guard let self = self else {return}
-            switch result {
-            case .success(let favoriteCharacters):
-                
-                if favoriteCharacters.isEmpty {
-                    // empty
-                }else {
-                    self.favorites = favoriteCharacters
-      
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                }
-            case .failure(let error):
-                self.presentAlert(message:error.rawValue, title: "Something went wrong!")
-            }
-        }
+    func saveDatas(favoriteList: [Favorite]) {
+        favorites = favoriteList
+        tableView.reloadData()
     }
 }
 
-
-
 extension FavoritesVC: UITableViewDelegate, UITableViewDataSource {
-   
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return favorites.count
     }
@@ -82,22 +72,11 @@ extension FavoritesVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        
         guard editingStyle == .delete else {return}
         
         let character = favorites[indexPath.row]
         
-        FavoritesManager.updateWith(character: character, actionType: .remove) {[weak self] error in
-            guard let self = self else {return}
-            guard let error = error else {
-                self.favorites.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .left)
-                return}
-            
-            // if there is an error
-            
-            self.presentAlert(message: error.rawValue , title: "Unable to remove")
-        }
+        viewModel.removeFavoriteChar(chracter: character, indexPath:indexPath)
     }
 }
 

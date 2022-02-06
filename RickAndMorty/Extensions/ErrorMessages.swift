@@ -6,11 +6,10 @@
 //
 
 enum ErrorMessages: String, Error {
-    
-    case urlError           = "Invalid url please check url"
-    case decodingError      = "There is an error when decodind data"
+    case networkError       = "Please check your network connection!"
     case imageError         = "There is an error when downloand image"
-    case searchingError     = "There is an error when searching data"
+    case searchingError     = "Please check your entered name!"
     case unableToFavorite   = "Something went wrong when favorited"
     case alreadyInFavorite  = "This user already added"
+    case filteredError      = "Please check your filters"
 }

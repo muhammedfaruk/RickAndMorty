@@ -46,7 +46,24 @@ class CharacterDetailVC: UIViewController {
         
         characterImage.downloadImage(url: character.image)
     }
+        
     
+    @objc func didTapFavoriteButton(){
+        let character = Favorite(name: character.name, image: character.image)
+        
+        FavoritesManager.updateWith(character: character, actionType: .add) { error in
+            guard let error = error else {
+                self.presentAlert(message: "Sucessfully favorited this user 🥳", title: "Success")
+                return
+            }                
+            self.presentAlert(message: error.rawValue, title: "Success")
+        }
+    }
+}
+
+
+//MARK: Design
+extension CharacterDetailVC {
     private func configureLayout(){
         view.addSubviews(views: characterImage,nameLabel,statusLabel,genderLabel,originLabel,locationLabel,favoriteButton)
 
@@ -93,20 +110,4 @@ class CharacterDetailVC: UIViewController {
         
         favoriteButton.addTarget(self, action: #selector(didTapFavoriteButton), for: .touchUpInside)
     }
-    
-    @objc func didTapFavoriteButton(){
-        
-        let character = Favorite(name: character.name, image: character.image)
-        
-        FavoritesManager.updateWith(character: character, actionType: .add) { error in
-            
-            guard let error = error else {
-                self.presentAlert(message: "Sucessfully favorited this user 🥳", title: "Success")
-                return
-            }                
-            self.presentAlert(message: error.rawValue, title: "Success")
-        }
-        
-    }    
-    
 }

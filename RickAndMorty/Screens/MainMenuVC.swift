@@ -6,27 +6,34 @@
 //
 
 import UIKit
-import SkeletonView
+
+protocol MainMenuVCOutPut {
+    func changeLoading(isLoading: Bool, isLoadMoreCharacter: Bool)
+    func saveDatas(characters: [Character])
+    func getError(errorRawValue: String)
+}
 
 
 class MainMenuVC: UIViewController {
-    
-    lazy var characterList  = [Character]()
+
+    lazy var characterList : [Character] = []
     
     var collectionView : UICollectionView!
-    let reuseIdentifier = "characterCell"
-    
-    var isSearching : Bool = false
-    var isLoadingMoreCharacter : Bool = false
-    var showSkeleton: Bool = true
+        
+    var isSearching             : Bool = false
+    var isLoadingMoreCharacter  : Bool = false
     var page = 1
+    
+    lazy var viewModel: CharacterListViewModel = CharacterListViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         configureVC()
         configureCollectionView()
         configureSearchController()
-        getCharacters(pageNumber: page)
+        viewModel.setDelegate(output: self)
+        viewModel.getCharacters(page: page)
     }
     
     private func configureVC() {
@@ -38,7 +45,10 @@ class MainMenuVC: UIViewController {
     
     @objc func didTapClearButton(){
         characterList.removeAll()
-        getCharacters(pageNumber: 1)
+        viewModel.removeAllArrayCharacters()
+        viewModel.getCharacters(page: 1)
+        page = 1
+        collectionView.setContentOffset(CGPoint(x: 0, y:0), animated: true)
     }
     
     @objc func didTapFilterButton(){
@@ -50,7 +60,7 @@ class MainMenuVC: UIViewController {
     private func configureCollectionView(){
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: UIHelper.createFlowLayout(view: self.view))
         view.addSubview(collectionView)
-        collectionView.register(CharacterCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        collectionView.register(CharacterCell.self, forCellWithReuseIdentifier: CharacterCell.reuseID)
         collectionView.delegate     = self
         collectionView.dataSource   = self
     }
@@ -62,55 +72,29 @@ class MainMenuVC: UIViewController {
         searchController.searchBar.delegate          = self
         navigationItem.searchController              = searchController
     }
-    
-    
-    // MARK: Get Data From Network
-    private func getCharacters(pageNumber : Int) {
+}
+
+
+//MARK: Connection to ViewModel
+extension MainMenuVC: MainMenuVCOutPut {
+   
+    func changeLoading(isLoading: Bool, isLoadMoreCharacter: Bool) {
+        isLoading ? showLoadingView() : hideLoadingView()
+        isLoadingMoreCharacter = isLoadMoreCharacter
+    }
         
-        showSkeleton ? showSkeleton(uıView: collectionView) : showLoadingView()
-        isLoadingMoreCharacter = true
-        NetworkManager.shared.getCharacters(type: .characters, page: page) {[weak self] characterList, error in
-            guard let self = self else {return}
-            self.showSkeleton ? self.hideSkeleton(uıView: self.view) : self.hideLoadingView()
-            
-            guard error == nil else {
-                //Internet connection error
-                self.presentAlert(message: "Please check your network connection!", title: "No Connection")
-                return
-            }
-            
-            guard let characterList = characterList else {return}
-            
-            self.characterList.append(contentsOf: characterList.results)
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
-            self.isLoadingMoreCharacter = false
-        }
+    func saveDatas(characters: [Character]) {
+        characterList = characters
+        collectionView.reloadData()
     }
     
-    private func searchCharacters(searchBarText: String) {
-        showSkeleton(uıView: collectionView)
-        NetworkManager.shared.searchCharacters(name: searchBarText) {[weak self] characterList, error in
-            guard let self = self else {return}
-            self.hideSkeleton(uıView: self.collectionView)
-            guard error == nil else {
-                //when user enter wrong name or wrong words
-                self.presentAlert(message: "Please check your name!", title: "Wrong name")
-                return
-            }
-            guard let characterList  = characterList else {return}
-            self.characterList       = characterList.results
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
-        }
-    }
+     func getError(errorRawValue: String) {
+         presentAlert(message: errorRawValue, title: "Error!")
+     }
 }
 
 
 // MARK: UICollectionView Data Settings
-
 extension MainMenuVC: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -120,7 +104,7 @@ extension MainMenuVC: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! CharacterCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CharacterCell.reuseID, for: indexPath) as! CharacterCell
         
         let character = characterList[indexPath.item]
         cell.set(character: character)
@@ -145,19 +129,13 @@ extension MainMenuVC: UICollectionViewDelegate, UICollectionViewDataSource {
                 
         if offsetY > contentHight - height {
             guard !isLoadingMoreCharacter else {return}
-            showSkeleton = false
             page += 1
-            getCharacters(pageNumber: self.page)
+            viewModel.getCharacters(page: page)
+            print(page)
         }
     }
 }
 
-// MARK: Skeleton View Settings
-extension MainMenuVC: SkeletonCollectionViewDataSource {
-    func collectionSkeletonView(_ skeletonView: UICollectionView, cellIdentifierForItemAt indexPath: IndexPath) -> ReusableCellIdentifier {
-        return reuseIdentifier
-    }
-}
 
 // MARK: Search bar settings
 extension MainMenuVC: UISearchBarDelegate {
@@ -169,38 +147,23 @@ extension MainMenuVC: UISearchBarDelegate {
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         if !searchBar.text!.isEmpty {
             let searchText = searchBar.text!.lowercased()
-            characterList.removeAll()
-            searchCharacters(searchBarText: searchText)
+            viewModel.searchCharacters(searchBarText: searchText)
         }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         isSearching = false
         characterList.removeAll()
-        getCharacters(pageNumber: page)
+        viewModel.removeAllArrayCharacters()
+        viewModel.getCharacters(page: 1)
+        page = 1
+        collectionView.setContentOffset(.zero, animated: false)
     }
 }
 
-// when user tapped filter search button here will work
+// MARK: Filter Button tapped
 extension MainMenuVC : FilterSettingsVCDelegate {
-    
-    func didTapSearchButton(gender: String, status: String, species: String) {
-        showLoadingView()
-        NetworkManager.shared.filterCharacters(status: status, gender: gender, species: species) { [weak self] characterList, error in
-            guard let self = self else {return}
-            self.hideLoadingView()
-            guard error == nil else {
-                //Internet connection error
-                self.presentAlert(message: "Please check your network connection!", title: "No Connection")
-                return
-            }
-            
-            guard let characterList = characterList else {return}
-            
-            self.characterList = characterList.results
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            } 
-        }
+    func didTapSearchButton(gender: String, status: String, species: String) {        
+        viewModel.filterCharacter(gender: gender, status: status, species: species)
     }
 }

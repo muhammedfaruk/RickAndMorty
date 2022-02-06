@@ -26,7 +26,7 @@ class NetworkManager {
         let endUrl = baseURL + type.rawValue + "\(page)"
         
         guard let url = URL(string: endUrl) else {
-            completion(nil, .urlError)
+            completion(nil, .networkError)
             return
         }
         
@@ -38,14 +38,14 @@ class NetworkManager {
                 
             case .success:
                 guard let characters = response.value else {
-                    completion(nil,.decodingError) // this is my custom error description but we can change localized descripton
+                    completion(nil,.networkError) // this is my custom error description but we can change localized descripton
                     return
                 }
                 
                 completion(characters,nil) // we got data
                 
             case .failure(_):
-                completion(nil,.decodingError)
+                completion(nil,.networkError)
             }
         }
     }
@@ -56,7 +56,7 @@ class NetworkManager {
         let endUrl = baseURL + "character/?name=\(name)"
         
         guard let url = URL(string: endUrl) else {
-            completion(nil, .urlError)
+            completion(nil, .searchingError)
             return
         }
         
@@ -80,14 +80,13 @@ class NetworkManager {
         }
     }
     
-    //https://rickandmortyapi.com/api/character/?status=alive&gender=male&species=Human
     
     func filterCharacters(status: String, gender:String, species:String, completion: @escaping networkCompletion) {
         
         let endUrl = baseURL + "character/?status=\(status)&gender=\(gender)&species=\(species)"
         
         guard let url = URL(string: endUrl) else {
-            completion(nil, .urlError)
+            completion(nil, .filteredError)
             return
         }
         
@@ -99,14 +98,14 @@ class NetworkManager {
                 
             case .success:
                 guard let characters = response.value else {
-                    completion(nil,.searchingError) // this is my custom error description but we can change localized descripton
+                    completion(nil,.filteredError) // this is my custom error description but we can change localized descripton
                     return
                 }
                 
                 completion(characters,nil) // we got data
                 
             case .failure(_):
-                completion(nil,.searchingError)
+                completion(nil,.filteredError)
             }
         }
     }

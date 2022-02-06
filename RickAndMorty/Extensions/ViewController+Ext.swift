@@ -20,19 +20,7 @@ extension UIViewController {
             self.present(alertController, animated: true)
         }
     }
-    
-    // MARK: Skeleton view show and hide
-    
-    func showSkeleton(uıView: UIView) {
-        uıView.isSkeletonable = true
-        uıView.showAnimatedSkeleton(usingColor: .carrot, transition: .crossDissolve(0.25))
-    }
-    
-    func hideSkeleton(uıView:UIView){
-        uıView.stopSkeletonAnimation()
-        view.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
-    }
-    
+     
     func showLoadingView() {
         containerView = UIView(frame: view.bounds)
         view.addSubview(containerView)
