@@ -1,8 +1,10 @@
 # Libraries
 
 1.Alamofire
-2.SkeletonView
 
+# Pattern
+
+-MVVM
 
 # Screenshots
 
