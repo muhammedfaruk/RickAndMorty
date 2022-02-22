@@ -1,14 +1,14 @@
 # Libraries
 
-1.Alamofire
+1. Alamofire
+2. UIFontComplete
+3. NVActivityIndicatorView
 
 # Pattern
-
--MVVM
+- MVVM
 
 # Screenshots
 
 
-<img src="https://user-images.githubusercontent.com/76944306/152526753-ba3ebf5e-4b10-41c0-9a03-57eeae7959a4.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/152526926-93c5209d-2c2b-41ca-8914-584ea8edfbf0.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/152526991-3c06a173-5a65-4306-9302-1a9786e6e120.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/152526994-0e87888f-8c99-45af-8cdc-cb16f4f1ac9b.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/152526998-3b905551-8d99-4cc8-8bc1-604528147e7f.png" width="250" height="500" />
-
+<img src="https://user-images.githubusercontent.com/76944306/155149223-4c46dd70-bdd5-42ab-9a1b-328765d612dd.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/155149232-2c3a2840-cb6d-49e4-b763-0e76802e5bd5.png" width="250" height="500" /><img src="https://user-images.githubusercontent.com/76944306/155149237-7de6e73f-831d-407b-9ee4-0e9f0bb1ce50.png" width="250" height="500" />
 
